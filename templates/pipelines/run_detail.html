@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Ejecución · Pipeline Portal{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'pipeline_detail' run.pipeline.slug %}">← Volver a {{ run.pipeline.name }}</a>
+<section class="page-heading"><div><div class="eyebrow">REGISTRO DE EJECUCIÓN</div><h1>Resultado del pipeline</h1><p class="mono">{{ run.id }}</p></div><span class="badge large {{ run.status }}">{{ run.get_status_display }}</span></section>
+{% if run.pipeline.engine == 'airflow' and run.remote_run_id and run.status != 'success' and run.status != 'failed' %}
+<form method="post" action="{% url 'sync_run' run.id %}" class="sync-form">{% csrf_token %}<button class="button secondary">Actualizar estado desde Airflow</button></form>
+{% endif %}
+{% if run.error_message %}<div class="notice error">{{ run.error_message }}</div>{% endif %}
+<div class="detail-grid">
+  <section class="card info-card"><div class="eyebrow">DETALLES</div><h2>Datos de ejecución</h2><dl>
+    <dt>Pipeline</dt><dd>{{ run.pipeline.name }}</dd><dt>Solicitado por</dt><dd>{{ run.requested_by.username }}</dd>
+    <dt>Creado</dt><dd>{{ run.created_at|date:'d M Y, H:i:s' }}</dd>
+    {% if run.started_at %}<dt>Iniciado</dt><dd>{{ run.started_at|date:'d M Y, H:i:s' }}</dd>{% endif %}
+    {% if run.finished_at %}<dt>Finalizado</dt><dd>{{ run.finished_at|date:'d M Y, H:i:s' }}</dd>{% endif %}
+    {% if run.original_filename %}<dt>Archivo</dt><dd>{{ run.original_filename }}</dd>{% endif %}
+    {% if run.remote_run_id %}<dt>ID en Airflow</dt><dd class="mono">{{ run.remote_run_id }}</dd>{% endif %}
+  </dl></section>
+  <section class="card info-card"><div class="eyebrow">RESULTADO</div><h2>Métricas</h2>
+    {% if run.metrics %}<dl>{% for key, value in run.metrics.items %}<dt>{{ key|cut:'_'|capfirst }}</dt><dd>{{ value }}</dd>{% endfor %}</dl>
+    {% else %}<p class="muted">{% if run.pipeline.engine == 'airflow' %}El portal registra el estado del DAG; las métricas y los logs de tareas se consultan en Airflow.{% else %}No hay métricas para esta ejecución.{% endif %}</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Ingresar · Pipeline Portal{% endblock %}
+{% block content %}
+<div class="login-layout">
+  <section class="intro">
+    <span class="eyebrow">OPERACIONES DE DATOS</span>
+    <h1>Sus pipelines, en un solo lugar.</h1>
+    <p>Ejecute procesos, consulte resultados y siga el estado de cada operación desde un panel claro.</p>
+    <div class="intro-line"><span>01</span> Ejecución controlada <span>02</span> Trazabilidad <span>03</span> Resultados</div>
+  </section>
+  <section class="card login-card">
+    <div class="eyebrow">ACCESO AL PORTAL</div>
+    <h2>Iniciar sesión</h2>
+    {% if form.errors %}<p class="notice error">Revise el usuario y la contraseña.</p>{% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <label for="id_username">Usuario</label>{{ form.username }}
+      <label for="id_password">Contraseña</label>{{ form.password }}
+      <button class="button primary full">Ingresar</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

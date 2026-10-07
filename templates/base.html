@@ -1,0 +1,30 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Pipeline Portal{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'app.css' %}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="{% url 'dashboard' %}"><span class="brand-mark">P</span><span>Pipeline <strong>Portal</strong></span></a>
+      {% if user.is_authenticated %}
+      <nav class="nav">
+        <a href="{% url 'dashboard' %}">Panel</a>
+        <a href="{% url 'api_pipelines' %}">API</a>
+        {% if user.is_staff %}<a href="{% url 'admin:index' %}">Administración</a>{% endif %}
+      </nav>
+      <div class="account"><span>{{ user.username }}</span><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="text-button">Salir</button></form></div>
+      {% endif %}
+    </div>
+  </header>
+  <main class="shell main">
+    {% if messages %}<div class="messages" role="status">{% for message in messages %}<div class="notice {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="shell footer">Pipeline Portal · Django · {{ request.user.username|default:"Acceso protegido" }}</footer>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}{{ pipeline.name }} · Pipeline Portal{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'dashboard' %}">← Volver al panel</a>
+<section class="page-heading"><div><div class="eyebrow">{{ pipeline.get_engine_display|upper }} / {{ pipeline.slug }}</div><h1>{{ pipeline.name }}</h1><p>{{ pipeline.description }}</p></div></section>
+<div class="detail-grid">
+  <section class="card form-card"><div class="eyebrow">NUEVA EJECUCIÓN</div><h2>Iniciar pipeline</h2>
+    {% if pipeline.engine == 'csv' %}
+      <p>Suba un CSV UTF-8 de hasta 5 MB. Se procesará en esta solicitud y verá sus métricas enseguida.</p>
+      <form method="post" action="{% url 'start_run' pipeline.slug %}" enctype="multipart/form-data">
+        {% csrf_token %}<label for="file">Archivo CSV</label><input id="file" name="file" type="file" accept=".csv,text/csv" required>
+        <small>Columnas: fecha, producto, cantidad, precio_unitario. Fechas AAAA-MM-DD y números con punto decimal.</small>
+        <button class="button primary">Procesar archivo →</button>
+      </form>
+      <p class="hint">Archivo de ejemplo: <code>samples/ventas.csv</code></p>
+    {% else %}
+      <p>Este pipeline inicia el DAG <code>{{ pipeline.dag_id }}</code> en Airflow 3. El estado se consulta desde la página de la ejecución.</p>
+      <form method="post" action="{% url 'start_run' pipeline.slug %}">{% csrf_token %}<button class="button primary">Ejecutar DAG →</button></form>
+    {% endif %}
+  </section>
+  <aside class="card info-card"><div class="eyebrow">FICHA TÉCNICA</div><h2>Configuración</h2><dl><dt>Motor</dt><dd>{{ pipeline.get_engine_display }}</dd><dt>Estado</dt><dd>Activo</dd>{% if pipeline.dag_id %}<dt>DAG ID</dt><dd><code>{{ pipeline.dag_id }}</code></dd>{% endif %}<dt>Creado</dt><dd>{{ pipeline.created_at|date:'d M Y' }}</dd></dl></aside>
+</div>
+<section class="section-heading"><div><div class="eyebrow">HISTORIAL</div><h2>Últimas ejecuciones</h2></div></section>
+<div class="card table-wrap"><table><thead><tr><th>ID</th><th>Estado</th><th>Usuario</th><th>Fecha</th><th></th></tr></thead><tbody>
+{% for run in runs %}<tr><td><code>{{ run.id|stringformat:'.8s' }}</code></td><td><span class="badge {{ run.status }}">{{ run.get_status_display }}</span></td><td>{{ run.requested_by.username }}</td><td>{{ run.created_at|date:'d M Y, H:i' }}</td><td><a href="{% url 'run_detail' run.id %}">Abrir →</a></td></tr>
+{% empty %}<tr><td colspan="5" class="muted">Este pipeline aún no tiene ejecuciones.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

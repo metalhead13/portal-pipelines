@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Panel · Pipeline Portal{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div><div class="eyebrow">CENTRO DE OPERACIONES</div><h1>Panel de pipelines</h1><p>Supervise las ejecuciones y abra un pipeline para iniciar un proceso.</p></div>
+  {% if user.is_staff %}<a class="button secondary" href="{% url 'admin:pipelines_pipeline_add' %}">+ Nuevo pipeline</a>{% endif %}
+</section>
+<section class="stats">
+  <article class="stat"><span>Pipelines activos</span><strong>{{ total_pipelines }}</strong><small>Disponibles para ejecución</small></article>
+  <article class="stat"><span>Ejecuciones</span><strong>{{ total_runs }}</strong><small>Historial registrado</small></article>
+  <article class="stat"><span>Finalizadas con éxito</span><strong>{{ successful_runs }}</strong><small>Procesos completados</small></article>
+</section>
+<section class="section-heading"><div><div class="eyebrow">CATÁLOGO</div><h2>Pipelines disponibles</h2></div></section>
+<div class="pipeline-grid">
+  {% for pipeline in pipelines %}
+  <a class="card pipeline-card" href="{% url 'pipeline_detail' pipeline.slug %}">
+    <div class="card-top"><span class="engine">{{ pipeline.get_engine_display }}</span><span class="arrow">↗</span></div>
+    <h3>{{ pipeline.name }}</h3><p>{{ pipeline.description|default:'Sin descripción'|truncatechars:120 }}</p>
+    <div class="card-bottom"><span>{{ pipeline.run_count }} ejecuciones</span><span>Ver detalles →</span></div>
+  </a>
+  {% empty %}<div class="card empty">Aún no hay pipelines activos. {% if user.is_staff %}Cree uno en Administración.{% endif %}</div>{% endfor %}
+</div>
+<section class="section-heading"><div><div class="eyebrow">ACTIVIDAD</div><h2>Ejecuciones recientes</h2></div><a href="{% url 'api_runs' %}">Ver API →</a></section>
+<div class="card table-wrap"><table><thead><tr><th>Pipeline</th><th>Estado</th><th>Solicitante</th><th>Fecha</th><th></th></tr></thead><tbody>
+{% for run in recent %}<tr><td>{{ run.pipeline.name }}</td><td><span class="badge {{ run.status }}">{{ run.get_status_display }}</span></td><td>{{ run.requested_by.username }}</td><td>{{ run.created_at|date:'d M Y, H:i' }}</td><td><a href="{% url 'run_detail' run.id %}">Abrir →</a></td></tr>
+{% empty %}<tr><td colspan="5" class="muted">Todavía no hay ejecuciones.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}
