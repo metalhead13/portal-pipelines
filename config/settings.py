@@ -1,8 +1,14 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env", override=False)
+
 DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
+
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "insecure-local-development-only" if DEBUG else "")
 if not SECRET_KEY:
     raise RuntimeError("DJANGO_SECRET_KEY is required when DJANGO_DEBUG=0")
