@@ -1,4 +1,4 @@
-# Pipeline Portal
+# Pipeline Portal basado en django  
 
 Portal de operaciones de datos hecho con Django 5.2 y Django REST Framework. Ofrece una aplicación web con inicio de sesión, catálogo de pipelines, ejecuciones, estados, métricas y API de consulta.
 
